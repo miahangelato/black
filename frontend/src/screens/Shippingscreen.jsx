@@ -1,78 +1,107 @@
-// ShippingAddressForm.js
-import React, { useState, useEffect } from 'react';
-import { connect } from 'react-redux'; // Import connect
-import { setShippingAddress } from '../actions/shippingActions'; // Import the action creator
-import axios from 'axios';
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { saveShippingAddress } from '../actions/shippingActions'; 
+import { loadShippingAddress } from '../actions/shippingActions';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Container, Form, Button, Row, Col } from 'react-bootstrap';
 
-const ShippingAddressForm = ({ order, setShippingAddress }) => {
-    const [shippingAddress, setShippingAddressState] = useState({
-        address: '',
-        city: '',
-        postalCode: '',
-        country: '',
-    });
+
+
+function ShippingScreen({ history }) {
+    const dispatch = useDispatch();
+    const cart = useSelector(state => state.cart);
+    const { shippingAddress } = useSelector(state => state.cart);
+    const [address, setAddress] = useState('');
+    const [city, setCity] = useState('');
+    const [postalCode, setPostalCode] = useState('');
+    const [country, setCountry] = useState('');
+  
+    const navigate = useNavigate();
+
+
 
     useEffect(() => {
-        const fetchShippingAddress = async () => {
-            try {
-                const response = await axios.get(`/shipping/${order._id}/`);
-                setShippingAddress(response.data);
-            } catch (error) {
-                console.error('Error fetching shipping address:', error);
-            }
-        };
+        const shippingAddressFromStorage = localStorage.getItem('shippingAddress')
+          ? JSON.parse(localStorage.getItem('shippingAddress'))
+          : {};
+        
+        setAddress(shippingAddressFromStorage.address || '');
+        setCity(shippingAddressFromStorage.city || '');
+        setPostalCode(shippingAddressFromStorage.postalCode || '');
+        setCountry(shippingAddressFromStorage.country || '');
+      }, []);
+    
+      const submitHandler = (e) => {
+        e.preventDefault();
+        dispatch(saveShippingAddress({ address, city, postalCode, country }));
+        localStorage.setItem('shippingAddress', JSON.stringify({ address, city, postalCode, country }));
+      };
+      const nextStep = () => {
+          navigate('/payment');
+      }
 
-        fetchShippingAddress();
-    }, [order._id, setShippingAddress]);
+      return (
+        <Container>
+          <Row className="justify-content-md-center">
+            <Col xs={12} md={6}>
+              <h1>Shipping Address</h1>
+              <Form onSubmit={submitHandler}>
+                <Form.Group controlId="address">
+                  <Form.Label>Address</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="Enter address"
+                    value={address}
+                    required
+                    onChange={(e) => setAddress(e.target.value)}
+                  ></Form.Control>
+                </Form.Group>
+    
+                <Form.Group controlId="city">
+                  <Form.Label>City</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="Enter city"
+                    value={city}
+                    required
+                    onChange={(e) => setCity(e.target.value)}
+                  ></Form.Control>
+                </Form.Group>
+    
+                <Form.Group controlId="postalCode">
+                  <Form.Label>Postal Code</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="Enter postal code"
+                    value={postalCode}
+                    required
+                    onChange={(e) => setPostalCode(e.target.value)}
+                  ></Form.Control>
+                </Form.Group>
+    
+                <Form.Group controlId="country">
+                  <Form.Label>Country</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="Enter country"
+                    value={country}
+                    required
+                    onChange={(e) => setCountry(e.target.value)}
+                  ></Form.Control>
+                </Form.Group>
+    
+                <Button variant="primary" type="submit">
+                  Save
+                </Button>
+                <Button variant="secondary" onClick={submitHandler} className="ml-2">
+                  Continue
+                </Button>
+              </Form>
+            </Col>
+          </Row>
+        </Container>
+      );
+    }
 
-    const handleFormSubmit = async (event) => {
-        event.preventDefault();
-
-        try {
-            await axios.post(`/shipping/${order._id}/`, shippingAddress);
-            // Dispatch the action to update the shipping address in Redux
-            setShippingAddress(shippingAddress);
-            console.log('Shipping address updated successfully');
-        } catch (error) {
-            console.error('Error updating shipping address:', error);
-        }
-    };
-
-    return (
-        <form onSubmit={handleFormSubmit}>
-            <label>Address:</label>
-            <input
-                type="text"
-                value={shippingAddress.address}
-                onChange={(e) => setShippingAddressState({ ...shippingAddress, address: e.target.value })}
-            />
-            <label>City:</label>
-            <input
-                type="text"
-                value={shippingAddress.city}
-                onChange={(e) => setShippingAddressState({ ...shippingAddress, city: e.target.value })}
-            />
-            <label>Postal Code:</label>
-            <input
-                type="text"
-                value={shippingAddress.postalCode}
-                onChange={(e) => setShippingAddressState({ ...shippingAddress, postalCode: e.target.value })}
-            />
-            <label>Country:</label>
-            <input
-                type="text"
-                value={shippingAddress.country}
-                onChange={(e) => setShippingAddressState({ ...shippingAddress, country: e.target.value })}
-            />
-            <button type="submit">Save Shipping Address</button>
-        </form>
-    );
-};
-
-// Map dispatch to props: Connect the action creator to the component
-const mapDispatchToProps = (dispatch) => ({
-    setShippingAddress: (address) => dispatch(setShippingAddress(address)),
-});
-
-// Connect the component to the Redux store
-export default connect(null, mapDispatchToProps)(ShippingAddressForm);
+export default ShippingScreen;

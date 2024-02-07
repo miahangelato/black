@@ -16,6 +16,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils import timezone
 from rest_framework.renderers import JSONRenderer  
 from rest_framework.parsers import JSONParser
+import json
 
 
 
@@ -110,30 +111,39 @@ def getRoutes(request):
     ]
     return Response(routes)
 
-@api_view(['GET', 'POST'])
-@permission_classes([IsAuthenticated])
-def get_or_update_shipping_address(request, order_id):
-    user = request.user
-
-    if request.method == 'GET':
+@api_view(['POST'])
+def ShippingAddress(request):
+    if request.method == 'POST':
         try:
-            shipping_address = ShippingAddress.objects.get(order__id=order_id, user=user)
-            serializer = ShippingAddressSerializer(shipping_address)
-            return Response(serializer.data)
-        except ShippingAddress.DoesNotExist:
-            return Response({'detail': 'Shipping address not found'}, status=404)
+            data = json.loads(request.body.decode('utf-8'))
+            user_id = data.get('user')
+            address = data.get('address', '')
+            city = data.get('city', '')
+            postalCode = data.get('postalCode', '')
+            country = data.get('country', '')
 
-    elif request.method == 'POST':
-        try:
-            shipping_address = ShippingAddress.objects.get(order__id=order_id, user=user)
-            serializer = ShippingAddressSerializer(instance=shipping_address, data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data)
-            return Response(serializer.errors, status=400)
-        except ShippingAddress.DoesNotExist:
-            serializer = ShippingAddressSerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save(user=user, order_id=order_id)
-                return Response(serializer.data)
-            return Response(serializer.errors, status=400)
+            user_id = data.get('user')
+            if user_id is None:
+                return JsonResponse({'error': 'User ID is required'}, status=400)
+
+            user = User.objects.get(id=user_id)
+            
+            shipping_address, created = ShippingAddress.objects.update_or_create(
+                user=user,
+                defaults={
+                    'address': address,
+                    'city': city,
+                    'postalCode': postalCode,
+                    'country': country,
+                },
+            )
+
+            return JsonResponse({'status': 'Address saved successfully'})
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'User not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+    else:
+        return JsonResponse({'error': 'Invalid request'}, status=400)

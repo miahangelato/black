@@ -10,7 +10,7 @@ urlpatterns = [
     path('users/register', views.registerUser, name='register'),
     path('products/', views.getProducts, name='products'),
     path('products/<str:pk>', views.getProduct, name='product'),
-    path('api/shipping/<int:order_id>/', views.get_or_update_shipping_address, name='get_or_update_shipping_address'),
+    path('shipping/', views.ShippingAddress, name="ship"),
 
 
 ]

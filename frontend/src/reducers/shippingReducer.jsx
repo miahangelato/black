@@ -1,27 +1,35 @@
-// reducer.js
-import { SET_SHIPPING_ADDRESS, CLEAR_SHIPPING_ADDRESS } from '../constants/shippingConstants';
+import {
+    CART_SAVE_SHIPPING_ADDRESS,
+    CART_LOAD_SHIPPING_ADDRESS,
+    // ... other imports
+} from "../constants/shippingConstants";
 
 const initialState = {
-  shippingAddress: null,
+    // ... your other initial state properties
+    shippingAddress: {}, // Initial value for shippingAddress
 };
 
 const shippingReducer = (state = initialState, action) => {
-  switch (action.type) {
-    case SET_SHIPPING_ADDRESS:
-      return {
-        ...state,
-        shippingAddress: action.payload,
-      };
+    switch (action.type) {
+        // ... other cases
 
-    case CLEAR_SHIPPING_ADDRESS:
-      return {
-        ...state,
-        shippingAddress: null,
-      };
+        case CART_SAVE_SHIPPING_ADDRESS:
+            return {
+                ...state,
+                shippingAddress: action.payload,
+            };
 
-    default:
-      return state;
-  }
+        case CART_LOAD_SHIPPING_ADDRESS:
+            return {
+                ...state,
+                shippingAddress: action.payload,
+            };
+
+        // ... other cases
+
+        default:
+            return state;
+    }
 };
 
 export default shippingReducer;

@@ -2,6 +2,7 @@ import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import {thunk} from 'redux-thunk';
 import { productListReducer, productDetailsReducer } from './reducers/productsReducers';
 import { userLoginReducer } from './reducers/userReducers';
+import  shippingReducer  from './reducers/shippingReducer';
 // If both files are in the same directory
 
 
@@ -15,6 +16,7 @@ const rootReducer = combineReducers({
     cart: cartReducer,
 
     userLogin: userLoginReducer,
+    shippingAddress: shippingReducer,
 });
 
 // Retrieve cartItems and userInfo from localStorage
