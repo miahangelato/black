@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "@redux-devtools/extension": "^3.3.0",
+    "@reduxjs/toolkit": "^2.0.1",
+    "axios": "^1.6.5",
+    "react": "^18.2.0",
+    "redux": "^5.0.1",
+    "redux-thunk": "^3.1.0",
+    "virtualenv": "^0.3.1"
+  }
+}
